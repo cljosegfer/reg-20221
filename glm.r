@@ -49,7 +49,7 @@ Y <- class_train
 
 beta_0 <- matrix(0, nrow = ncol(X), ncol = 1)
 
-epochs <- 15
+epochs <- model$iter
 beta <- beta_0
 for (epoch in 1:epochs){
   p <- as.vector(1 / (1 + exp(- X %*% beta)))
