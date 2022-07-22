@@ -48,10 +48,20 @@ X <- cbind(1, train)
 Y <- class_train
 # lambda <- 1e3
 
-lambdas <- seq(0, 0.005, 0.0001)
+lambdas <- seq(0, 0.003, 0.0001)
 report <- matrix(0, nrow = length(lambdas), ncol = 3)
 for (lambda in lambdas){
-  beta <- matrix(0, nrow = ncol(X), ncol = 1)
+  # first guess
+  # beta <- matrix(0, nrow = ncol(X), ncol = 1)
+  y_num = matrix(0, nrow = nrow(Y), ncol = ncol(Y))
+  y_num[Y == 0] = 0.05
+  y_num[Y == 1] = 0.95
+  y_lm <- - log(1 / y_num - 1)
+  
+  data_lm <- data.frame(y = y_lm, x = train)
+  linear <- lm(y_lm ~ train, data = data_lm)
+  
+  beta <- linear$coefficients
   
   # epochs <- model$iter
   epochs <- 100

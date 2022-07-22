@@ -41,16 +41,26 @@ data <- data.frame(y = class_train, x = train)
 model <- glm(class_train ~ train, data = data, family = 'binomial')
 data$y_hat <- predict(model, data, type = "response")
 
-beta_true <- model$coefficients
-
 # model
 X <- cbind(1, train)
 Y <- class_train
 
-beta <- matrix(0, nrow = ncol(X), ncol = 1)
+# first guess
+y_num = matrix(0, nrow = nrow(Y), ncol = ncol(Y))
+delta <- 1e-3
+y_num[Y == 0] = delta
+y_num[Y == 1] = 1 - delta
+y_lm <- - log(1 / y_num - 1)
 
+data_lm <- data.frame(y = y_lm, x = train)
+linear <- lm(y_lm ~ train, data = data_lm)
+
+beta <- linear$coefficients
+
+# model
 epochs <- model$iter
-tol <- 0.001
+print(paste('glm epochs:', epochs))
+tol <- 1e-3
 epoch <- 0
 delta <- 1e6
 while (delta > tol & epoch < epochs){
@@ -63,8 +73,9 @@ while (delta > tol & epoch < epochs){
   beta <- solve(t(X) %*% W %*% X) %*% t(X) %*% W %*% Z
   delta <- max(abs(beta - beta_old))
   epoch <- epoch + 1
-  print(c(epoch, delta))
+  print(paste('epoca:', epoch, '| delta:', delta))
 }
 
-epsilon <- beta_true - beta
+epsilon <- model$coefficients - beta
+print('epsilon:')
 print(epsilon)
