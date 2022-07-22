@@ -47,17 +47,23 @@ beta_true <- model$coefficients
 X <- cbind(1, train)
 Y <- class_train
 
-beta_0 <- matrix(0, nrow = ncol(X), ncol = 1)
+beta <- matrix(0, nrow = ncol(X), ncol = 1)
 
 epochs <- model$iter
-beta <- beta_0
-for (epoch in 1:epochs){
+tol <- 0.001
+epoch <- 0
+delta <- 1e6
+while (delta > tol & epoch < epochs){
   p <- as.vector(1 / (1 + exp(- X %*% beta)))
   W <- p * (1 - p) * diag(length(p))
   W_inv <- 1 / (p * (1 - p)) * diag(length(p))
   Z <- X %*% beta + W_inv %*% (Y - p)
   
+  beta_old <- beta
   beta <- solve(t(X) %*% W %*% X) %*% t(X) %*% W %*% Z
+  delta <- max(abs(beta - beta_old))
+  epoch <- epoch + 1
+  print(c(epoch, delta))
 }
 
 epsilon <- beta_true - beta
